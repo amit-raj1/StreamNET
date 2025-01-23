@@ -20,6 +20,7 @@ import ChatLoader from "../components/ChatLoader";
 import CallButton from "../components/CallButton";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
+const client = StreamChat.getInstance(STREAM_API_KEY);
 
 const ChatPage = () => {
   const { id: targetUserId } = useParams();
@@ -42,8 +43,6 @@ const ChatPage = () => {
 
       try {
         console.log("Initializing stream chat client...");
-
-        const client = StreamChat.getInstance(STREAM_API_KEY);
 
         await client.connectUser(
           {
