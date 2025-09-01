@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import { useQuery } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api";
@@ -18,18 +18,20 @@ import toast from "react-hot-toast";
 
 import ChatLoader from "../components/ChatLoader";
 import CallButton from "../components/CallButton";
+import CustomMessageComponent from "../components/CustomMessageComponent";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 const client = StreamChat.getInstance(STREAM_API_KEY);
 
 const ChatPage = () => {
   const { id: targetUserId } = useParams();
+  const navigate = useNavigate();
 
   const [chatClient, setChatClient] = useState(null);
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const { authUser } = useAuthUser();
+  const { authUser, isLoading: authLoading } = useAuthUser();
 
   const { data: tokenData } = useQuery({
     queryKey: ["streamToken"],
@@ -39,7 +41,10 @@ const ChatPage = () => {
 
   useEffect(() => {
     const initChat = async () => {
-      if (!tokenData?.token || !authUser) return;
+      if (!tokenData?.token || !authUser) {
+        setLoading(false);
+        return;
+      }
 
       try {
         console.log("Initializing stream chat client...");
@@ -88,10 +93,21 @@ const ChatPage = () => {
       });
 
       toast.success("Video call link sent successfully!");
+      
+      // Navigate to the call page
+      navigate(`/call/${channel.id}`);
     }
   };
 
-  if (loading || !chatClient || !channel) return <ChatLoader />;
+  if (authLoading || loading) return <ChatLoader />;
+  
+  if (!authUser) {
+    // Redirect to login if not authenticated
+    navigate('/login');
+    return null;
+  }
+  
+  if (!chatClient || !channel) return <ChatLoader />;
 
   return (
     <div className="h-[93vh]">
@@ -101,7 +117,7 @@ const ChatPage = () => {
             <CallButton handleVideoCall={handleVideoCall} />
             <Window>
               <ChannelHeader />
-              <MessageList />
+              <MessageList Message={CustomMessageComponent} />
               <MessageInput focus />
             </Window>
           </div>

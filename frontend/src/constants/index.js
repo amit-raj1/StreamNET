@@ -1,5 +1,10 @@
 export const THEMES = [
   {
+    name: "streamnet",
+    label: "StreamNet",
+    colors: ["#4F46E5", "#10B981", "#8B5CF6", "#1F2937"],
+  },
+  {
     name: "light",
     label: "Light",
     colors: ["#ffffff", "#5a67d8", "#8b5cf6", "#1a202c"],
