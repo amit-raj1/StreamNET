@@ -1,111 +1,72 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useChatContext } from 'stream-chat-react';
 
 const CustomMessageComponent = (props) => {
+  const { message } = props;
   const navigate = useNavigate();
+  // Get the current user's ID to differentiate messages
+  const { client } = useChatContext();
   
-  // Debug what we're receiving
-  console.log('CustomMessageComponent received:', props);
-  
-  // Skip rendering if we don't have a valid message object
-  if (!props) {
-    return <div className="p-2 text-sm text-gray-500">Loading message...</div>;
-  }
-  
-  // Stream Chat passes the message differently depending on context
-  // First check if it's in the standard format from MessageList
-  const message = props.message || props;
-  
-  // Additional debug to see the exact message structure
-  console.log('Message object being used:', message);
+  // Determine if the message is from the logged-in user
+  const isMyMessage = message.user.id === client.userID;
 
-  // Function to handle click on video call links
-  const handleMessageClick = (event) => {
-    const target = event.target;
+  // Special rendering for video call links
+  const renderVideoCallMessage = (text) => {
+    const url = text.match(/(https?:\/\/[^\s]+)/g)?.[0];
+    if (!url) return text;
     
-    // Check if the clicked element is a link
-    if (target.tagName === 'A') {
-      const href = target.getAttribute('href');
-      
-      // Check if it's a video call link
-      if (href && href.includes('/call/')) {
-        event.preventDefault();
-        
-        // Extract the call ID from the URL
-        const callId = href.split('/call/')[1];
-        
-        // Navigate to the call page
-        navigate(`/call/${callId}`);
-      }
-    }
+    return (
+      <div className="p-4 bg-blue-100 rounded-lg border border-blue-200">
+        <p className="text-sm text-gray-700 mb-3">A video call has been started.</p>
+        <button
+          onClick={() => navigate(url.substring(url.indexOf('/call/')))}
+          className="w-full btn btn-sm btn-primary"
+        >
+          🎥 Join Call
+        </button>
+      </div>
+    );
   };
 
-  // Function to convert URLs to clickable links
-  const renderMessageText = (text) => {
-    if (!text) return '';
-    
-    // Regular expression to find URLs in text
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    
-    // Split the text by URLs and create an array of text and link elements
-    const parts = text.split(urlRegex);
-    const matches = text.match(urlRegex) || [];
-    
-    return parts.map((part, index) => {
-      // If this part is a URL, render it as a link
-      if (matches.includes(part)) {
-        return (
-          <a 
-            key={index} 
-            href={part} 
-            className="text-primary underline"
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            {part}
-          </a>
-        );
-      }
-      // Otherwise, render it as text
-      return part;
-    });
-  };
+  // Determine message content
+  const isVideoCall = message.text?.includes("/call/");
+  const messageContent = isVideoCall
+    ? renderVideoCallMessage(message.text)
+    : <p className="text-sm">{message.text}</p>;
 
-  // Get user data safely from the message object
-  const userName = message.user?.name || message.user?.id || 'Unknown User';
-  const userImage = message.user?.image || 'https://via.placeholder.com/40';
-  const messageTime = message.created_at ? 
-    new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
-    '';
+  // Format timestamp
+  const messageTime = new Date(message.created_at).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  
+  const user = message.user || {};
+  const userName = user.name || user.id || "Unknown User";
+  const userImage = user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}`;
 
   return (
-    <div 
-      className="p-2 hover:bg-base-200 rounded-lg transition-colors"
-      onClick={handleMessageClick}
-    >
-      <div className="flex items-start gap-3">
+    <div className={`p-2 flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex items-end gap-2 max-w-md ${isMyMessage ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className="avatar">
-          <div className="w-8 rounded-full">
-            <img 
-              src={userImage} 
-              alt={userName} 
-            />
+          <div className="w-6 rounded-full">
+            <img src={userImage} alt={userName} />
           </div>
         </div>
-        
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-sm">
-              {userName}
-            </span>
-            <span className="text-xs opacity-50">
-              {messageTime}
-            </span>
+
+        <div className="flex flex-col">
+          <div 
+            className={`px-4 py-2 rounded-lg ${
+              isMyMessage 
+                ? 'bg-blue-500 text-white rounded-br-none' 
+                : 'bg-gray-200 text-gray-800 rounded-bl-none'
+            }`}
+          >
+            {messageContent}
           </div>
-          
-          <div className="mt-1 text-sm">
-            {renderMessageText(message.text || '')}
-          </div>
+          <span className={`text-xs opacity-50 mt-1 px-1 ${isMyMessage ? 'text-right' : 'text-left'}`}>
+            {messageTime}
+          </span>
         </div>
       </div>
     </div>
