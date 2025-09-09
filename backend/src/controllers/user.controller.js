@@ -146,3 +146,38 @@ export async function getOutgoingFriendReqs(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+export const unfriendUser = async (req, res) => {
+  try {
+    const myId = req.user._id;                // logged-in user
+    const { id: friendId } = req.params;      // the friend to unfriend
+
+    if (!friendId) {
+      return res.status(400).json({ message: "Friend ID is required" });
+    }
+
+    if (myId.toString() === friendId.toString()) {
+      return res.status(400).json({ message: "You cannot unfriend yourself" });
+    }
+
+    // 1. Remove friend from both users' lists
+    await User.findByIdAndUpdate(myId, { $pull: { friends: friendId } });
+    await User.findByIdAndUpdate(friendId, { $pull: { friends: myId } });
+
+    // 2. Delete any accepted friend request record
+    await FriendRequest.findOneAndDelete({
+      $or: [
+        { sender: myId, recipient: friendId },
+        { sender: friendId, recipient: myId },
+      ],
+      status: "accepted",   // only delete if they were friends
+    });
+
+    // 3. Send response
+    res.status(200).json({ message: "Successfully unfriended" });
+  } catch (error) {
+    console.error("Error in unfriendUser:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+

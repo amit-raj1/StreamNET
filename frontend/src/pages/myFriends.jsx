@@ -1,12 +1,33 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserFriends } from "../lib/api";
 import { getLanguageFlag } from "../components/FriendCard"; 
 import { capitialize } from "../lib/utils";
+import { Link } from "react-router";
 
 const MyFriends = () => {
+  const queryClient = useQueryClient();
+
+  // Fetch friends
   const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
+  });
+
+  // Unfriend mutation
+  const { mutate: unfriendMutation, isPending } = useMutation({
+    mutationFn: async (friendId) => {
+      const res = await fetch(`http://localhost:5001/api/users/unfriend/${friendId}`, {
+        method: "DELETE",
+        credentials: "include", // ✅ send cookies/JWT if your backend uses them
+      });
+      if (!res.ok) {
+        throw new Error("Failed to unfriend");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+    },
   });
 
   if (loadingFriends) {
@@ -59,8 +80,25 @@ const MyFriends = () => {
                 </span>
               </div>
 
-              {/* Message button */}
-              <button className="btn btn-outline w-full mt-4">Message</button>
+              {/* Actions */}
+              <div className="flex gap-2 w-full mt-4">
+                {/* Message button */}
+                <Link
+                  to={`/chat/${friend._id}`}
+                  className="btn btn-outline flex-1"
+                >
+                  Message
+                </Link>
+
+                {/* Unfriend button */}
+                <button
+                  className="btn btn-error flex-1"
+                  disabled={isPending}
+                  onClick={() => unfriendMutation(friend._id)}
+                >
+                  {isPending ? "Removing..." : "Unfriend"}
+                </button>
+              </div>
             </div>
           </div>
         ))}

@@ -7,6 +7,7 @@ import {
   getOutgoingFriendReqs,
   getRecommendedUsers,
   sendFriendRequest,
+  unfriendUser
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -22,5 +23,7 @@ router.put("/friend-request/:id/accept", acceptFriendRequest);
 
 router.get("/friend-requests", getFriendRequests);
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
+
+router.delete("/unfriend/:id", unfriendUser);
 
 export default router;
