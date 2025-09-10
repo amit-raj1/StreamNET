@@ -124,7 +124,7 @@ const LearningPlatformLanding = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-hidden relative">
+    <div className="min-h-screen bg-base-100 text-base-content">
       {/* Dynamic Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
@@ -132,8 +132,10 @@ const LearningPlatformLanding = () => {
         <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-gradient-to-r from-emerald-600/20 to-cyan-600/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
+
+
       {/* Floating Navigation */}
-      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-black/20 backdrop-blur-md rounded-full border border-white/10 px-8 py-4">
+      {/* <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-black/20 backdrop-blur-md rounded-full border border-white/10 px-8 py-4">
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center relative overflow-hidden">
@@ -151,7 +153,9 @@ const LearningPlatformLanding = () => {
             </button>
           </div>
         </div>
-      </nav>
+      </nav> */}
+
+      
 
       {/* Hero Section */}
       <section id="hero" className="pt-40 pb-20 px-4 sm:px-6 lg:px-8 relative">

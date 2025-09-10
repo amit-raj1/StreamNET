@@ -8,7 +8,8 @@ import {
   getRecommendedUsers,
   searchUsers,
   sendFriendRequest,
-  unfriendUser
+  unfriendUser,
+  updateProfile
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -27,5 +28,6 @@ router.get("/friend-requests", getFriendRequests);
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.delete("/unfriend/:id", unfriendUser);
+router.put("/profile", updateProfile);
 
 export default router;

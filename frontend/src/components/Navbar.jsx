@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import { BellIcon, LogOutIcon, SearchIcon, ShipWheelIcon, X } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
@@ -149,16 +149,18 @@ const Navbar = () => {
           {/* Theme Switcher */}
           <ThemeSelector />
 
-          {/* Avatar */}
-          <div className="avatar">
-            <div className="w-9 rounded-full">
-              <img
-                src={authUser?.profilePic}
-                alt="User Avatar"
-                referrerPolicy="no-referrer"
-              />
+          {/* Avatar - Clickable to navigate to profile */}
+          <Link to="/profile">
+            <div className="avatar cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="w-9 rounded-full">
+                <img
+                  src={authUser?.profilePic}
+                  alt="User Avatar"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* Logout button */}
           <button

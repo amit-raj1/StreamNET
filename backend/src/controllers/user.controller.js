@@ -203,3 +203,38 @@ export const unfriendUser = async (req, res) => {
   }
 };
 
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic } = req.body;
+
+    // Validate required fields
+    if (!fullName || !nativeLanguage || !learningLanguage) {
+      return res.status(400).json({ message: "Full name, native language, and learning language are required" });
+    }
+
+    // Update user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        fullName,
+        bio,
+        nativeLanguage,
+        learningLanguage,
+        location,
+        profilePic,
+      },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    console.error("Error in updateProfile:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+

@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUserFriends } from "../lib/api";
+import { getUserFriends, unfriendUser } from "../lib/api";
 import { getLanguageFlag } from "../components/FriendCard"; 
 import { capitialize } from "../lib/utils";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 const MyFriends = () => {
   const queryClient = useQueryClient();
@@ -15,18 +15,12 @@ const MyFriends = () => {
 
   // Unfriend mutation
   const { mutate: unfriendMutation, isPending } = useMutation({
-    mutationFn: async (friendId) => {
-      const res = await fetch(`http://localhost:5001/api/users/unfriend/${friendId}`, {
-        method: "DELETE",
-        credentials: "include", // ✅ send cookies/JWT if your backend uses them
-      });
-      if (!res.ok) {
-        throw new Error("Failed to unfriend");
-      }
-      return res.json();
-    },
+    mutationFn: unfriendUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["friends"] });
+    },
+    onError: (error) => {
+      console.error("Error unfriending user:", error);
     },
   });
 

@@ -68,3 +68,13 @@ export async function searchUsers(query) {
   const response = await axiosInstance.get(`/users/search?query=${encodeURIComponent(query)}`);
   return response.data;
 }
+
+export async function updateProfile(userData) {
+  const response = await axiosInstance.put("/users/profile", userData);
+  return response.data;
+}
+
+export async function unfriendUser(friendId) {
+  const response = await axiosInstance.delete(`/users/unfriend/${friendId}`);
+  return response.data;
+}
