@@ -1,6 +1,28 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 
+export async function searchUsers(req, res) {
+  try {
+    const { query } = req.query;
+    const currentUserId = req.user.id;
+
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const users = await User.find({
+      fullName: { $regex: query, $options: 'i' },
+      _id: { $ne: currentUserId },
+      isOnboarded: true
+    }).select('fullName profilePic nativeLanguage learningLanguage');
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error in searchUsers controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export async function getRecommendedUsers(req, res) {
   try {
     const currentUserId = req.user.id;

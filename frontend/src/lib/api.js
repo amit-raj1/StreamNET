@@ -63,3 +63,8 @@ export async function getStreamToken() {
   const response = await axiosInstance.get("/chat/token");
   return response.data;
 }
+
+export async function searchUsers(query) {
+  const response = await axiosInstance.get(`/users/search?query=${encodeURIComponent(query)}`);
+  return response.data;
+}
