@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserFriends, unfriendUser } from "../lib/api";
-import { getLanguageFlag } from "../components/FriendCard"; 
-import { capitialize } from "../lib/utils";
+import { getLanguageFlag, getLanguageName } from "../lib/languageUtils"; 
 import { Link } from "react-router-dom";
 
 const MyFriends = () => {
@@ -66,11 +65,11 @@ const MyFriends = () => {
               <div className="flex flex-wrap justify-center gap-2 mt-2">
                 <span className="badge badge-secondary">
                   {getLanguageFlag(friend.nativeLanguage)}
-                  Native: {capitialize(friend.nativeLanguage)}
+                  Native: {getLanguageName(friend.nativeLanguage)}
                 </span>
                 <span className="badge badge-outline">
                   {getLanguageFlag(friend.learningLanguage)}
-                  Learning: {capitialize(friend.learningLanguage)}
+                  Learning: {getLanguageName(friend.learningLanguage)}
                 </span>
               </div>
 

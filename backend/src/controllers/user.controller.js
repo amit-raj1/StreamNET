@@ -1,20 +1,39 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
+import mongoose from "mongoose";
 
 export async function searchUsers(req, res) {
   try {
     const { query } = req.query;
     const currentUserId = req.user.id;
 
+    console.log("=== SEARCH DEBUG ===");
+    console.log("Search query received:", query);
+    console.log("Query type:", typeof query);
+    console.log("Current user ID:", currentUserId);
+
     if (!query) {
+      console.log("No query provided, returning error");
       return res.status(400).json({ message: "Search query is required" });
     }
 
+    // First, let's see all users to debug
+    const allUsers = await User.find({}).select('fullName isOnboarded isMasterAdmin');
+    console.log("All users in database for search:", allUsers);
+
+    // Search all users except master admin, include friends
     const users = await User.find({
       fullName: { $regex: query, $options: 'i' },
-      _id: { $ne: currentUserId },
-      isOnboarded: true
+      _id: { $ne: currentUserId }, // Don't include current user in search results
+      isOnboarded: true,
+      $or: [
+        { isMasterAdmin: { $ne: true } },
+        { isMasterAdmin: { $exists: false } }
+      ]
     }).select('fullName profilePic nativeLanguage learningLanguage');
+
+    console.log("Search results count:", users.length);
+    console.log("Search results:", users.map(u => ({ name: u.fullName, id: u._id.toString() })));
 
     res.status(200).json(users);
   } catch (error) {
@@ -26,16 +45,55 @@ export async function searchUsers(req, res) {
 export async function getRecommendedUsers(req, res) {
   try {
     const currentUserId = req.user.id;
-    const currentUser = req.user;
+    
+    console.log("Getting recommendations for user ID:", currentUserId);
+    
+    // Get current user to get friend list
+    const currentUser = await User.findById(currentUserId).select('friends');
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    console.log("Current user found, friends count:", currentUser.friends.length);
 
-    const recommendedUsers = await User.find({
-      $and: [
-        { _id: { $ne: currentUserId } }, //exclude current user
-        { _id: { $nin: currentUser.friends } }, // exclude current user's friends
-        { isOnboarded: true },
-      ],
+    // Convert friend IDs to strings for comparison
+    const friendIdsAsStrings = currentUser.friends.map(id => id.toString());
+    console.log("Friend IDs (as strings):", friendIdsAsStrings);
+
+    // Let's check what's in the database first
+    const allUsersRaw = await User.find({}).select('fullName isOnboarded isMasterAdmin');
+    console.log("All users raw data:", allUsersRaw);
+
+    // Get all eligible users - simplified query
+    const allUsers = await User.find({
+      isOnboarded: true,
+      $or: [
+        { isMasterAdmin: { $ne: true } },
+        { isMasterAdmin: { $exists: false } }
+      ]
+    }).select('fullName profilePic nativeLanguage learningLanguage bio location _id');
+
+    console.log("All eligible users:", allUsers.map(u => ({ name: u.fullName, id: u._id.toString() })));
+
+    // Filter out current user and friends
+    const recommendedUsers = allUsers.filter(user => {
+      const userIdString = user._id.toString();
+      const isCurrentUser = userIdString === currentUserId;
+      const isFriend = friendIdsAsStrings.includes(userIdString);
+      
+      console.log(`User: ${user.fullName}, ID: ${userIdString}, isCurrentUser: ${isCurrentUser}, isFriend: ${isFriend}`);
+      
+      return !isCurrentUser && !isFriend;
     });
-    res.status(200).json(recommendedUsers);
+
+    console.log("Final recommended users:", recommendedUsers.map(u => ({ name: u.fullName, id: u._id.toString() })));
+    
+    // Sort by newest and limit
+    const sortedUsers = recommendedUsers
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 20);
+    
+    res.status(200).json(sortedUsers);
   } catch (error) {
     console.error("Error in getRecommendedUsers controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -51,6 +109,44 @@ export async function getMyFriends(req, res) {
     res.status(200).json(user.friends);
   } catch (error) {
     console.error("Error in getMyFriends controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function getUserById(req, res) {
+  try {
+    const { userId } = req.params;
+    
+    const user = await User.findById(userId)
+      .select('fullName profilePic nativeLanguage learningLanguage')
+      .lean();
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error in getUserById controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function checkIfFriends(req, res) {
+  try {
+    const { userId } = req.params;
+    const currentUserId = req.user.id;
+
+    if (userId === currentUserId) {
+      return res.status(400).json({ message: "Cannot check friendship status with yourself" });
+    }
+
+    const user = await User.findById(currentUserId).select("friends");
+    const isFriend = user.friends.includes(userId);
+
+    res.status(200).json({ isFriend });
+  } catch (error) {
+    console.error("Error in checkIfFriends controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
@@ -237,4 +333,29 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export async function declineFriendRequest(req, res) {
+  try {
+    const { id: requestId } = req.params;
+
+    const friendRequest = await FriendRequest.findById(requestId);
+
+    if (!friendRequest) {
+      return res.status(404).json({ message: "Friend request not found" });
+    }
+
+    // Verify the current user is the recipient
+    if (friendRequest.recipient.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You are not authorized to decline this request" });
+    }
+
+    // Delete the declined request
+    await FriendRequest.findByIdAndDelete(requestId);
+
+    res.status(200).json({ message: "Friend request declined" });
+  } catch (error) {
+    console.log("Error in declineFriendRequest controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { acceptFriendRequest, getFriendRequests } from "../lib/api";
-import { BellIcon, ClockIcon, MessageSquareIcon, UserCheckIcon } from "lucide-react";
+import { acceptFriendRequest, declineFriendRequest, getFriendRequests } from "../lib/api";
+import { BellIcon, ClockIcon, MessageSquareIcon, UserCheckIcon, XIcon } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 
 const NotificationsPage = () => {
@@ -16,6 +16,13 @@ const NotificationsPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
       queryClient.invalidateQueries({ queryKey: ["friends"] });
+    },
+  });
+
+  const { mutate: declineRequestMutation, isPending: isDeclining } = useMutation({
+    mutationFn: declineFriendRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
     },
   });
 
@@ -66,13 +73,23 @@ const NotificationsPage = () => {
                             </div>
                           </div>
 
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => acceptRequestMutation(request._id)}
-                            disabled={isPending}
-                          >
-                            Accept
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={() => acceptRequestMutation(request._id)}
+                              disabled={isPending || isDeclining}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              className="btn btn-error btn-sm"
+                              onClick={() => declineRequestMutation(request._id)}
+                              disabled={isPending || isDeclining}
+                            >
+                              <XIcon className="size-4 mr-1" />
+                              Decline
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

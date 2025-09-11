@@ -1,12 +1,14 @@
 import express from "express";
-import { login, logout, onboard, signup } from "../controllers/auth.controller.js";
+import { login, logout, onboard, signup, createAdmin } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { optionalMasterAdminAuth } from "../middleware/masterAdmin.middleware.js";
 
 const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
+router.post("/create-admin", optionalMasterAdminAuth, createAdmin);
 
 router.post("/onboarding", protectRoute, onboard);
 

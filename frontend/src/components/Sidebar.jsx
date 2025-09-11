@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, Book, ChevronLeft, ChevronRight } from "lucide-react";
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, Book, ChevronLeft, ChevronRight, ShieldIcon, HeadphonesIcon, TicketIcon, HelpCircleIcon } from "lucide-react";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
@@ -47,49 +47,93 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        <Link
-          to="/home"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/home" ? "btn-active" : ""
-          } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
-          data-tip={isCollapsed ? "Home" : ""}
-        >
-          <HomeIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
-          {!isCollapsed && <span>Home</span>}
-        </Link>
+        {authUser?.isAdmin ? (
+          /* Admin Navigation */
+          <>
+            <Link
+              to="/admin"
+              className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+                currentPath === "/admin" ? "btn-active" : ""
+              } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
+              data-tip={isCollapsed ? "Admin Dashboard" : ""}
+            >
+              <ShieldIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
+              {!isCollapsed && <span>Admin Dashboard</span>}
+            </Link>
 
-        <Link
-          to="/"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/" ? "btn-active" : ""
-          } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
-          data-tip={isCollapsed ? "Learners" : ""}
-        >
-          <Book className="size-5 text-base-content opacity-70 flex-shrink-0" />
-          {!isCollapsed && <span>Learners</span>}
-        </Link>
+            <Link
+              to="/admin/tickets"
+              className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+                currentPath === "/admin/tickets" ? "btn-active" : ""
+              } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
+              data-tip={isCollapsed ? "Ticket Management" : ""}
+            >
+              <TicketIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
+              {!isCollapsed && <span>Ticket Management</span>}
+            </Link>
 
-        <Link
-          to="/friends"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/friends" ? "btn-active" : ""
-          } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
-          data-tip={isCollapsed ? "Friends" : ""}
-        >
-          <UsersIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
-          {!isCollapsed && <span>Friends</span>}
-        </Link>
+            {/* Only show Create Admin for Master Admin */}
+            {authUser?.isMasterAdmin && (
+              <Link
+                to="/admin/create"
+                className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+                  currentPath === "/admin/create" ? "btn-active" : ""
+                } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
+                data-tip={isCollapsed ? "Create Admin" : ""}
+              >
+                <UsersIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
+                {!isCollapsed && <span>Create Admin</span>}
+              </Link>
+            )}
+          </>
+        ) : (
+          /* User Navigation */
+          <>
+            <Link
+              to="/"
+              className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+                currentPath === "/" || currentPath === "/home" ? "btn-active" : ""
+              } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
+              data-tip={isCollapsed ? "Home" : ""}
+            >
+              <HomeIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
+              {!isCollapsed && <span>Home</span>}
+            </Link>
 
-        <Link
-          to="/notifications"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/notifications" ? "btn-active" : ""
-          } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
-          data-tip={isCollapsed ? "Notifications" : ""}
-        >
-          <BellIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
-          {!isCollapsed && <span>Notifications</span>}
-        </Link>
+            <Link
+              to="/friends"
+              className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+                currentPath === "/friends" ? "btn-active" : ""
+              } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
+              data-tip={isCollapsed ? "Friends" : ""}
+            >
+              <UsersIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
+              {!isCollapsed && <span>Friends</span>}
+            </Link>
+
+            <Link
+              to="/notifications"
+              className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+                currentPath === "/notifications" ? "btn-active" : ""
+              } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
+              data-tip={isCollapsed ? "Notifications" : ""}
+            >
+              <BellIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
+              {!isCollapsed && <span>Notifications</span>}
+            </Link>
+
+            <Link
+              to="/support"
+              className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+                currentPath === "/support" ? "btn-active" : ""
+              } ${isCollapsed ? 'tooltip tooltip-right' : ''}`}
+              data-tip={isCollapsed ? "Support & Tickets" : ""}
+            >
+              <HelpCircleIcon className="size-5 text-base-content opacity-70 flex-shrink-0" />
+              {!isCollapsed && <span>Support & Tickets</span>}
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* USER PROFILE SECTION */}

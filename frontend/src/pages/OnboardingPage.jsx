@@ -122,8 +122,8 @@ const OnboardingPage = () => {
                 >
                   <option value="">Select your native language</option>
                   {LANGUAGES.map((lang) => (
-                    <option key={`native-${lang}`} value={lang.toLowerCase()}>
-                      {lang}
+                    <option key={`native-${lang.code}`} value={lang.code}>
+                      {lang.flag} {lang.name}
                     </option>
                   ))}
                 </select>
@@ -142,8 +142,8 @@ const OnboardingPage = () => {
                 >
                   <option value="">Select language you're learning</option>
                   {LANGUAGES.map((lang) => (
-                    <option key={`learning-${lang}`} value={lang.toLowerCase()}>
-                      {lang}
+                    <option key={`learning-${lang.code}`} value={lang.code}>
+                      {lang.flag} {lang.name}
                     </option>
                   ))}
                 </select>

@@ -47,6 +47,19 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isMasterAdmin: {
+      type: Boolean,
+      
+      default: false,
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

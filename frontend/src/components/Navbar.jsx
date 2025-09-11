@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, LogOutIcon, SearchIcon, ShipWheelIcon, X } from "lucide-react";
+import { BellIcon, LogOutIcon, SearchIcon, ShipWheelIcon, X, MessageCircle, UserPlusIcon, HomeIcon, EyeIcon } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
-import { useEffect, useRef, useState } from "react";
-import { searchUsers } from "../lib/api";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { searchUsers, getUserFriends } from "../lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 const Navbar = () => {
   const { authUser } = useAuthUser();
@@ -17,6 +18,15 @@ const Navbar = () => {
   const searchInputRef = useRef(null);
 
   const { logoutMutation, isPending } = useLogout();
+  
+  // Fetch user's friends to check chat permissions
+  const { data: friends = [] } = useQuery({
+    queryKey: ["friends"],
+    queryFn: getUserFriends,
+  });
+  
+  // Create a set of friend IDs for quick lookup
+  const friendIds = useMemo(() => new Set(friends.map(friend => friend._id)), [friends]);
   
   useEffect(() => {
     if (showSearch && searchInputRef.current) {
@@ -44,10 +54,10 @@ const Navbar = () => {
     
     const debounceTimeout = setTimeout(handleSearch, 300);
     return () => clearTimeout(debounceTimeout);
-  }, [searchQuery]);
+  }, [searchQuery, friendIds]);
 
   return (
-    <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-30 h-16 flex items-center">
+    <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-40 h-16 flex items-center">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-end w-full">
           {/* LOGO - ONLY IN THE CHAT PAGE */}
@@ -63,6 +73,13 @@ const Navbar = () => {
           )}
 
           <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+            {/* Home Button */}
+            <Link to="/">
+              <button className="btn btn-ghost btn-circle">
+                <HomeIcon className="h-6 w-6 text-base-content opacity-70" />
+              </button>
+            </Link>
+            
             {/* Search Button and Input */}
             <div className="relative">
               {!showSearch ? (
@@ -101,31 +118,77 @@ const Navbar = () => {
                   <div className="p-2">
                     <h3 className="text-sm font-semibold mb-2">Search Results</h3>
                     <div className="space-y-2">
-                      {searchResults.map((user) => (
-                        <Link 
-                          key={user._id} 
-                          to={`/chat/${user._id}`}
-                          className="flex items-center gap-2 p-2 hover:bg-base-300 rounded-lg"
-                          onClick={() => {
-                            setShowSearch(false);
-                            setSearchQuery("");
-                            setSearchResults([]);
-                          }}
-                        >
-                          <div className="avatar">
-                            <div className="w-8 rounded-full">
-                              <img src={user.profilePic} alt={user.fullName} />
+                      {searchResults.map((user) => {
+                        const isFriend = friendIds.has(user._id);
+                        return (
+                          <div 
+                            key={user._id} 
+                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-base-300"
+                          >
+                            <div className="avatar">
+                              <div className="w-8 rounded-full">
+                                <img src={user.profilePic} alt={user.fullName} />
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{user.fullName}</p>
+                              <p className="text-xs opacity-70">
+                                {user.nativeLanguage} → {user.learningLanguage}
+                              </p>
+                            </div>
+                            <div className="flex gap-1">
+                              {isFriend ? (
+                                <Link 
+                                  to={`/chat/${user._id}`}
+                                  className="btn btn-primary btn-xs"
+                                  onClick={() => {
+                                    setShowSearch(false);
+                                    setSearchQuery("");
+                                    setSearchResults([]);
+                                  }}
+                                >
+                                  <MessageCircle className="w-3 h-3 mr-1" />
+                                  Chat
+                                </Link>
+                              ) : (
+                                <>
+                                  <Link 
+                                    to="/friends"
+                                    className="btn btn-outline btn-xs"
+                                    onClick={() => {
+                                      setShowSearch(false);
+                                      setSearchQuery("");
+                                      setSearchResults([]);
+                                    }}
+                                  >
+                                    <UserPlusIcon className="w-3 h-3 mr-1" />
+                                    Add
+                                  </Link>
+                                  <Link 
+                                    to={`/profile/${user._id}`}
+                                    className="btn btn-ghost btn-xs"
+                                    onClick={() => {
+                                      setShowSearch(false);
+                                      setSearchQuery("");
+                                      setSearchResults([]);
+                                    }}
+                                  >
+                                    <EyeIcon className="w-3 h-3 mr-1" />
+                                    View
+                                  </Link>
+                                </>
+                              )}
                             </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium">{user.fullName}</p>
-                            <p className="text-xs opacity-70">
-                              {user.nativeLanguage} → {user.learningLanguage}
-                            </p>
-                          </div>
-                        </Link>
-                      ))}
+                        );
+                      })}
                     </div>
+                    {searchResults.length > 0 && !searchResults.some(user => friendIds.has(user._id)) && (
+                      <div className="text-center py-3 text-sm text-warning">
+                        <p>💡 You can only chat with friends!</p>
+                        <p className="text-xs opacity-70 mt-1">Send friend requests to start chatting</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

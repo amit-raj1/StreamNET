@@ -10,6 +10,10 @@ import OnboardingPage from "./pages/OnboardingPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import MyFriends from "./pages/myFriends.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import SupportPage from "./pages/SupportPage.jsx";
+import AdminCreation from "./pages/AdminCreation.jsx";
+import AdminTicketManagement from "./pages/AdminTicketManagement.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -38,21 +42,37 @@ const App = () => {
                 <HomePage />
               </Layout>
             ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              <LandingPage />
+            )
+          }
+        />
+        <Route
+          path="/home"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <HomePage />
+              </Layout>
+            ) : (
+              <Navigate to="/" />
             )
           }
         />
         <Route
           path="/signup"
           element={
-            !isAuthenticated ? <SignUpPage /> : <Navigate to={isOnboarded ? "/" : "/onboarding"} />
+            !isAuthenticated ? <SignUpPage /> : <Navigate to="/" />
           }
         />
         <Route
           path="/login"
           element={
-            !isAuthenticated ? <LoginPage /> : <Navigate to={isOnboarded ? "/" : "/onboarding"} />
+            !isAuthenticated ? <LoginPage /> : <Navigate to="/" />
           }
+        />
+        <Route
+          path="/create-admin"
+          element={<AdminCreation />}
         />
         <Route
           path="/notifications"
@@ -62,7 +82,7 @@ const App = () => {
                 <NotificationsPage />
               </Layout>
             ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              <Navigate to="/" />
             )
           }
         />
@@ -72,7 +92,7 @@ const App = () => {
             isAuthenticated && isOnboarded ? (
               <CallPage />
             ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              <Navigate to="/" />
             )
           }
         />
@@ -85,7 +105,7 @@ const App = () => {
                 <ChatPage />
               </Layout>
             ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              <Navigate to="/" />
             )
           }
         />
@@ -112,19 +132,7 @@ const App = () => {
                 <MyFriends />
               </Layout>
             ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-            )
-          }
-        />
-        <Route
-          path="/home"
-          element={
-            isAuthenticated && isOnboarded ? (
-              <Layout showSidebar={true}>
-                <LandingPage />
-              </Layout>
-            ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              <Navigate to="/" />
             )
           }
         />
@@ -136,7 +144,67 @@ const App = () => {
                 <ProfilePage />
               </Layout>
             ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route
+          path="/profile/:id"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <ProfilePage />
+              </Layout>
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            isAuthenticated && isOnboarded && authUser?.isAdmin ? (
+              <Layout showSidebar={true}>
+                <AdminDashboard />
+              </Layout>
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route
+          path="/admin/tickets"
+          element={
+            isAuthenticated && isOnboarded && authUser?.isAdmin ? (
+              <Layout showSidebar={true}>
+                <AdminTicketManagement />
+              </Layout>
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route
+          path="/admin/create"
+          element={
+            isAuthenticated && isOnboarded && authUser?.isMasterAdmin ? (
+              <Layout showSidebar={true}>
+                <AdminCreation />
+              </Layout>
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route
+          path="/support"
+          element={
+            isAuthenticated && isOnboarded && !authUser?.isAdmin ? (
+              <Layout showSidebar={true}>
+                <SupportPage />
+              </Layout>
+            ) : (
+              <Navigate to="/" />
             )
           }
         />

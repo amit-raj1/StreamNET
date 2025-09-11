@@ -1,10 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logout } from "../lib/api";
-import { useNavigate } from "react-router";
 
 const useLogout = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const {
     mutate: logoutMutation,
@@ -15,11 +13,20 @@ const useLogout = () => {
     onSuccess: () => {
       // Clear user data from cache
       queryClient.setQueryData(["authUser"], null);
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
-
-      // Redirect to login page
-      navigate("/login");
+      queryClient.clear(); // Clear all cache data
+      
+      // Don't clear theme from localStorage - keep user's theme preference
+      
+      // Force reload to clear any remaining state
+      window.location.href = "/login";
     },
+    onError: () => {
+      // Even if logout fails on server, clear local data
+      queryClient.setQueryData(["authUser"], null);
+      queryClient.clear();
+      // Don't clear theme here either
+      window.location.href = "/login";
+    }
   });
 
   return { logoutMutation, isPending, error };
