@@ -11,7 +11,7 @@ const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       // Redirect admin to dashboard
       if (data?.user?.isAdmin || data?.user?.isMasterAdmin) {
-        navigate("/admin/dashboard");
+        navigate("/admin");
       }
     },
   });
