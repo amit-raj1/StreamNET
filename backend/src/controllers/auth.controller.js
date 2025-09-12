@@ -21,8 +21,9 @@ export async function signup(req, res) {
     }
 
     const existingUser = await User.findOne({ email });
+    console.log("Signup check: existingUser for email", email, ":", existingUser);
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists, please use a diffrent one" });
+      return res.status(400).json({ message: "Email already exists, please use a different one" });
     }
 
     const idx = Math.floor(Math.random() * 100) + 1; // generate a num between 1-100
@@ -167,19 +168,21 @@ export async function login(req, res) {
     }
 
     const user = await User.findOne({ email });
+    console.log("Login attempt for email:", email);
+    console.log("User found:", user);
+
     if (!user) return res.status(401).json({ message: "Invalid email or password" });
 
     const isPasswordCorrect = await user.matchPassword(password);
+    console.log("Password match result:", isPasswordCorrect);
+
     if (!isPasswordCorrect) return res.status(401).json({ message: "Invalid email or password" });
 
-    // --- Start Debugging Step ---
-    // Log the secret key being used to SIGN the token
-    console.log("Token SIGNED with secret:", process.env.JWT_SECRET_KEY);
-    // --- End Debugging Step ---
-    
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "7d",
     });
+
+    console.log("JWT token generated:", token);
 
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,

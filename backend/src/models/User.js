@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
     },
     isOnboarded: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     friends: [
       {
