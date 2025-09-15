@@ -64,7 +64,7 @@ const ChatPage = () => {
     }
 
     const initChat = async () => {
-      if (!tokenData?.token || !authUser) {
+      if (!tokenData?.token || !authUser || !targetUser) {
         setLoading(false);
         return;
       }
@@ -72,6 +72,7 @@ const ChatPage = () => {
       try {
         console.log("Initializing stream chat client...");
         console.log("Auth User:", authUser);
+        console.log("Target User:", targetUser);
         console.log("Token Data:", tokenData);
 
         // Create a new client instance or use existing
@@ -97,9 +98,17 @@ const ChatPage = () => {
         const channelId = [authUser._id, targetUserId].sort().join("-");
         console.log("Channel ID:", channelId);
 
+        // Create channel with proper naming - only show target user's name
         const currChannel = client.channel("messaging", channelId, {
           members: [authUser._id, targetUserId],
-          name: targetUser ? `Chat with ${targetUser.fullName}` : `Chat with User`,
+          name: targetUser.fullName, // Only show target user's name
+          image: targetUser.profilePic, // Add target user's profile picture
+          // Add custom data for better identification
+          data: {
+            targetUserId: targetUserId,
+            targetUserName: targetUser.fullName,
+            targetUserImage: targetUser.profilePic
+          }
         });
 
         await currChannel.watch();

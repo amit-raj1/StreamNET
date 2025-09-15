@@ -62,24 +62,25 @@ const Navbar = () => {
   return (
     <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-40 h-16 flex items-center">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-end w-full">
-          {/* LOGO - ONLY IN THE CHAT PAGE */}
-          {isChatPage && (
-            <div className="pl-5">
-              <Link to="/" className="flex items-center gap-2.5">
-                <ShipWheelIcon className="size-9 text-primary" />
-                <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-                  streamNET
-                </span>
-              </Link>
-            </div>
-          )}
+        <div className="flex items-center justify-between w-full">
+          
+          {/* LOGO - Left side */}
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center gap-2.5">
+              <ShipWheelIcon className="size-8 sm:size-9 text-primary" />
+              <span className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+                StreamNET
+              </span>
+            </Link>
+          </div>
 
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+          {/* RIGHT SIDE ICONS - Right side with better spacing */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+            
             {/* Home Button */}
             <Link to="/">
-              <button className="btn btn-ghost btn-circle">
-                <HomeIcon className="h-6 w-6 text-base-content opacity-70" />
+              <button className="btn btn-ghost btn-circle btn-sm sm:btn-md">
+                <HomeIcon className="h-5 w-5 sm:h-6 sm:w-6 text-base-content opacity-70" />
               </button>
             </Link>
             
@@ -88,10 +89,10 @@ const Navbar = () => {
               <div className="relative">
                 {!showSearch ? (
                   <button 
-                    className="btn btn-ghost btn-circle" 
+                    className="btn btn-ghost btn-circle btn-sm sm:btn-md" 
                     onClick={() => setShowSearch(true)}
                   >
-                    <SearchIcon className="h-6 w-6 text-base-content opacity-70" />
+                    <SearchIcon className="h-5 w-5 sm:h-6 sm:w-6 text-base-content opacity-70" />
                   </button>
                 ) : (
                   <div className="flex items-center bg-base-300 rounded-full pl-3 pr-1 py-1">
@@ -99,7 +100,7 @@ const Navbar = () => {
                       ref={searchInputRef}
                       type="text"
                       placeholder="Search friends by name..."
-                      className="bg-transparent border-none focus:outline-none w-48 text-sm"
+                      className="bg-transparent border-none focus:outline-none w-40 sm:w-48 text-sm"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -210,37 +211,37 @@ const Navbar = () => {
             {/* Notification Bell - only for non-admins */}
             {!isAdmin && (
               <Link to="/notifications">
-                <button className="btn btn-ghost btn-circle">
-                  <BellIcon className="h-6 w-6 text-base-content opacity-70" />
+                <button className="btn btn-ghost btn-circle btn-sm sm:btn-md">
+                  <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 text-base-content opacity-70" />
                 </button>
               </Link>
             )}
-          </div>
 
-          {/* Theme Switcher */}
-          <ThemeSelector />
+            {/* Theme Switcher */}
+            <ThemeSelector />
 
-          {/* Avatar - Clickable to navigate to profile */}
-          <Link to="/profile">
-            <div className="avatar cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="w-9 rounded-full">
-                <img
-                  src={authUser?.profilePic}
-                  alt="User Avatar"
-                  referrerPolicy="no-referrer"
-                />
+            {/* Avatar - Clickable to navigate to profile */}
+            <Link to="/profile">
+              <div className="avatar cursor-pointer hover:opacity-80 transition-opacity">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full">
+                  <img
+                    src={authUser?.profilePic}
+                    alt="User Avatar"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Logout button */}
-          <button
-            className="btn btn-ghost btn-circle"
-            onClick={() => logoutMutation()}
-            disabled={isPending}
-          >
-            <LogOutIcon className="h-6 w-6 text-base-content opacity-70" />
-          </button>
+            {/* Logout button */}
+            <button
+              className="btn btn-ghost btn-circle btn-sm sm:btn-md"
+              onClick={() => logoutMutation()}
+              disabled={isPending}
+            >
+              <LogOutIcon className="h-5 w-5 sm:h-6 sm:w-6 text-base-content opacity-70" />
+            </button>
+          </div>
         </div>
       </div>
     </nav>

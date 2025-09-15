@@ -1,52 +1,40 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, Book, ChevronLeft, ChevronRight, ShieldIcon, HeadphonesIcon, TicketIcon, HelpCircleIcon } from "lucide-react";
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, Book, ChevronLeft, ChevronRight, ShieldIcon, HeadphonesIcon, TicketIcon, HelpCircleIcon, ChevronsLeft, ChevronsRight } from "lucide-react";
 
-const Sidebar = () => {
+const Sidebar = ({ toggleSidebar, sidebarVisible }) => {
   const { authUser } = useAuthUser();
   const location = useLocation();
   const currentPath = location.pathname;
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const toggleSidebar = () => {
+  const handleToggle = () => {
     setIsCollapsed(!isCollapsed);
+    if (toggleSidebar) {
+      toggleSidebar();
+    }
   };
 
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-64'} bg-base-200 border-r border-base-300 flex flex-col h-screen sticky top-0 z-30 lg:static lg:z-auto transition-all duration-300 ease-in-out`}>
-      {/* Header with toggle button */}
-      <div className="p-5 border-b border-base-300 flex items-center justify-between">
-        {!isCollapsed && (
-          <Link to="/" className="flex items-center gap-2.5">
-            <ShipWheelIcon className="size-9 text-primary" />
-            <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-              StreamNET
-            </span>
-          </Link>
-        )}
-        
-        {isCollapsed && (
-          <div className="flex justify-center w-full">
-            <ShipWheelIcon className="size-9 text-primary" />
-          </div>
-        )}
-        
+    <aside className={`${isCollapsed ? 'w-16' : 'w-64'} bg-base-200 border-r border-base-300 flex flex-col h-full transition-all duration-300 ease-in-out relative`}>
+      {/* Toggle button - positioned at the top */}
+      <div className="relative">
         <button
-          onClick={toggleSidebar}
-          className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
+          onClick={handleToggle}
+          className="absolute -right-3 top-4 z-10 btn btn-circle btn-sm bg-base-200 border border-base-300 hover:bg-base-300 shadow-md"
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <ChevronRight className="size-5" />
+            <ChevronsRight className="size-4" />
           ) : (
-            <ChevronLeft className="size-5" />
+            <ChevronsLeft className="size-4" />
           )}
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 pt-12 space-y-1 overflow-y-auto">
         {authUser?.isAdmin ? (
           /* Admin Navigation */
           <>

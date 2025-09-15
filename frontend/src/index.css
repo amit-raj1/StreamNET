@@ -74,3 +74,8 @@
 .str-chat__message-text {
   color: oklch(var(--bc)) !important;
 }
+
+.str-chat__message-textarea-with-emoji-picker{
+  background-color: white;
+  border-radius: 0.75rem;
+}

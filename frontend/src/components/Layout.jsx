@@ -13,32 +13,29 @@ const Layout = ({ children, showSidebar = false }) => {
 
   return (
     <div className="min-h-screen" data-theme={theme}>
-      <div className="flex">
+      {/* Navbar takes full width at the top */}
+      <div className="w-full">
+        <Navbar />
+      </div>
+
+      {/* Content area below navbar */}
+      <div className="flex h-[calc(100vh-4rem)]"> {/* 4rem = navbar height (h-16) */}
+        {/* Sidebar */}
         {showSidebar && (
-          <div
-            className={`fixed z-50 h-full transition-transform duration-300 ease-in-out ${
-              sidebarVisible ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
+          <div className={`transition-all duration-300 ease-in-out ${
+            sidebarVisible ? "w-64" : "w-16"
+          }`}>
             <Sidebar toggleSidebar={toggleSidebar} sidebarVisible={sidebarVisible} />
           </div>
         )}
 
-        <div
-          className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
-            showSidebar && sidebarVisible ? "ml-64" : "ml-0"
-          }`}
-        >
-          <div className="flex items-center w-full">
-            <div className={`w-full`}>
-              <Navbar />
-            </div>
-          </div>
-
-          <main className="flex-1 overflow-y-auto">{children}</main>
-        </div>
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto bg-base-100">
+          {children}
+        </main>
       </div>
     </div>
   );
 };
+
 export default Layout;
